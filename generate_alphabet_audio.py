@@ -5,6 +5,7 @@ import edge_tts
 # Voice: en-US-AnaNeural is a warm, gentle voice designed specifically for kids and storytelling
 VOICE = "en-US-AnaNeural"
 OUTPUT_DIR = "/home/nandan/Disk_D/Pimlo_app/src/assets/audio"
+ANDROID_RAW_DIR = "/home/nandan/Disk_D/Pimlo_app/android/app/src/main/res/raw"
 
 ALPHABET_DATA = [
     ("A", "Apple", "ah"),
@@ -47,10 +48,15 @@ FEEDBACK_CLIPS = [
 
 async def generate_file(text: str, filename: str):
     os.makedirs(OUTPUT_DIR, exist_ok=True)
+    os.makedirs(ANDROID_RAW_DIR, exist_ok=True)
     filepath = os.path.join(OUTPUT_DIR, filename)
+    android_filepath = os.path.join(ANDROID_RAW_DIR, filename)
     # Slow down speed by 10% for child clarity and early sight-hearing
     communicate = edge_tts.Communicate(text, VOICE, rate="-10%", pitch="+2Hz")
     await communicate.save(filepath)
+    # Also copy to Android raw folder for native playback
+    with open(filepath, 'rb') as src_file, open(android_filepath, 'wb') as dst_file:
+        dst_file.write(src_file.read())
     print(f"🎵 Generated: {filename} -> '{text}'")
 
 async def main():
@@ -71,6 +77,7 @@ async def main():
 
     print("\n✅ All audio assets successfully generated and saved to:")
     print(f"👉 {OUTPUT_DIR}")
+    print(f"👉 {ANDROID_RAW_DIR}")
 
 if __name__ == "__main__":
     asyncio.run(main())
